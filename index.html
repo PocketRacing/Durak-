@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ДУРАК ONLINE</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#24533e,#08130e 75%);color:#fff;font-family:Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;font-weight:bold;background:#e9b957;color:#20180b}
+button:disabled{opacity:.35;cursor:not-allowed}
+.secondary{background:#263d32;color:white;border:1px solid #52715e}
+.danger{background:#8d3c3c;color:white}
+header{display:flex;justify-content:space-between;align-items:center;padding:17px 5%;background:#07110cdd;border-bottom:1px solid #345541}
+.logo{font-size:24px;font-weight:1000;letter-spacing:3px}.logo span{color:#f2c56a}
+main{max-width:1100px;margin:auto;padding:20px}
+.panel{background:#14271e;border:1px solid #365745;border-radius:18px;padding:18px;margin-bottom:15px;box-shadow:0 12px 35px #0005}
+h2{margin:0 0 14px;color:#f3cf83}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+input,select{background:#091710;color:white;border:1px solid #456450;padding:12px;border-radius:10px;min-width:0}
+.hidden{display:none!important}
+#table{min-height:270px;background:radial-gradient(ellipse,#286344,#12432e 65%,#0b2b1e);border:8px solid #493722;border-radius:35px;padding:20px;position:relative;box-shadow:inset 0 0 40px #0008}
+.players{display:flex;justify-content:space-around;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.player{background:#172b22;border:1px solid #46634f;border-radius:13px;padding:10px;text-align:center;min-width:105px}
+.player.active{border:2px solid #f3c56a;box-shadow:0 0 15px #f3c56a55}
+.avatar{font-size:27px}.muted{color:#a8c0ae;font-size:12px}
+#cards{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;min-height:120px;padding:12px}
+.card{width:66px;height:96px;border-radius:9px;background:#fffdf4;color:#171717;position:relative;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;border:2px solid #ddd;box-shadow:0 5px 10px #0005;transition:.15s}
+.card.red{color:#c72d35}.card.selected{transform:translateY(-15px);border:3px solid #f2c56a;box-shadow:0 0 15px #f2c56a}
+.card.back{background:repeating-linear-gradient(45deg,#1c3455,#1c3455 5px,#e3bd70 6px,#1c3455 8px);border:3px solid #f2d69c;color:transparent}
+#battle{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;min-height:125px}
+.played{width:65px;height:94px;background:#fffdf4;color:#161616;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:27px;position:relative}
+.played.red{color:#c72d35}.played small{position:absolute;bottom:3px;right:5px;font-size:10px}
+.slot{display:flex;gap:4px;align-items:center}
+#status{text-align:center;font-weight:bold;color:#f3d38d;margin:12px}
+#log{max-height:90px;overflow:auto;color:#b9d0c0;font-size:12px}
+.stickers{display:flex;gap:7px;flex-wrap:wrap}
+.stickers button{font-size:23px;padding:6px;background:#263d32;color:white}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#f1cb79;color:#20180b;padding:12px 18px;border-radius:20px;display:none;z-index:5;font-weight:bold}
+@media(max-width:600px){main{padding:10px}.card{width:48px;height:73px;font-size:22px}.played{width:49px;height:72px;font-size:22px}#table{padding:10px;border-width:5px}.logo{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">♠ ДУРАК <span>ONLINE</span></div>
+ <div class="row"><span class="muted">CARD CLUB</span><button class="secondary" onclick="showHome()">⌂ Меню</button></div>
+</header>
+<main>
+<section id="home">
+ <div class="panel">
+  <h2>🃏 Добро пожаловать в клуб</h2>
+  <p class="muted">Играй против ботов или подготовь комнату для друзей.</p>
+  <div class="row">
+   <button onclick="startGame()">Быстрая игра</button>
+   <button class="secondary" onclick="showSetup()">Настроить матч</button>
+  </div>
+ </div>
+ <div class="panel hidden" id="setup">
+  <h2>Настройка матча</h2>
+  <p>Количество игроков</p>
+  <select id="count">
+   <option value="2">2 игрока</option><option value="3">3 игрока</option>
+   <option value="4" selected>4 игрока</option><option value="5">5 игроков</option><option value="6">6 игроков</option>
+  </select>
+  <p>Правила</p>
+  <select id="rule"><option value="throw">Подкидной дурак</option><option value="transfer">Переводной дурак</option></select>
+  <p>Сложность ботов</p>
+  <select id="difficulty"><option value="easy">Лёгкая</option><option value="normal" selected>Обычная</option><option value="hard">Сложная</option></select>
+  <p>Количество ботов</p>
+  <select id="bots"><option value="1">1 бот</option><option value="2" selected>2 бота</option><option value="3">3 бота</option><option value="4">4 бота</option><option value="5">5 ботов</option></select>
+  <p class="muted">Свободные места заполняются ботами автоматически.</p>
+  <button onclick="startGame()">Начать матч</button>
+ </div>
+ <div class="panel">
+  <h2>🌐 Игра с другом</h2>
+  <p class="muted">Сетевая комната будет доступна после подключения Supabase. GitHub Pages сам по себе не синхронизирует ходы между устройствами.</p>
+  <div class="row">
+   <input id="roomName" placeholder="Имя комнаты">
+   <button class="secondary" onclick="toast('Для онлайна нужно подключить Supabase.')">Создать комнату</button>
+  </div>
+ </div>
+ <div class="panel">
+  <h2>🎭 Наши боты</h2>
+  <div class="row">
+   <span>🤖 Профессор</span><span>😎 Босс</span><span>😂 Весельчак</span><span>🐸 Лягуш</span><span>👻 Призрак</span>
+  </div>
+  <p class="muted">Боты умеют автоматически делать ходы, брать карты, отбиваться и реагировать стикерами.</p>
+ </div>
+</section>
+
+<section id="game" class="hidden">
+ <div class="row" style="justify-content:space-between;margin-bottom:12px">
+  <div><b id="gameTitle">Матч</b><div class="muted" id="deckInfo"></div></div>
+  <button class="secondary" onclick="showHome()">Выйти</button>
+ </div>
+ <div class="players" id="players"></div>
+ <div id="table">
+  <div id="trumpInfo" style="text-align:center;color:#f3d38d"></div>
+  <div id="battle"></div>
+  <div id="status">Подготовка...</div>
+ </div>
+ <div class="panel" style="margin-top:15px">
+  <div class="row" style="justify-content:space-between">
+   <b>Твои карты</b><span class="muted" id="handInfo"></span>
+  </div>
+  <div id="cards"></div>
+  <div class="row" style="justify-content:center">
+   <button id="attackBtn" onclick="attack()">Атаковать</button>
+   <button id="defendBtn" onclick="defend()">Отбиться</button>
+   <button id="takeBtn" class="danger" onclick="takeCards()">Взять карты</button>
+   <button id="passBtn" class="secondary" onclick="pass()">Бито / Пас</button>
+  </div>
+ </div>
+ <div class="panel">
+  <b>💬 Реакции и стикеры</b>
+  <div class="stickers" style="margin-top:10px">
+   <button onclick="sticker('😂')">😂</button><button onclick="sticker('😎')">😎</button>
+   <button onclick="sticker('😭')">😭</button><button onclick="sticker('🤡')">🤡</button>
+   <button onclick="sticker('🔥')">🔥</button><button onclick="sticker('👍')">👍</button>
+   <button onclick="sticker('💀')">💀</button><button onclick="sticker('🃏')">🃏</button>
+  </div>
+  <p id="reaction" style="font-size:28px;min-height:35px"></p>
+  <div id="log"></div>
+ </div>
+</section>
+</main>
+<div id="toast"></div>
+<script>
+const suits=['♠','♣','♥','♦'];
+const ranks=['6','7','8','9','10','J','Q','K','A'];
+const names=['Профессор','Босс','Весельчак','Лягуш','Призрак'];
+const faces=['🤖','😎','😂','🐸','👻'];
+let G=null, selected=-1, timer=null;
+
+function toast(s){let e=document.getElementById('toast');e.textContent=s;e.style.display='block';setTimeout(()=>e.style.display='none',1800)}
+function showSetup(){document.getElementById('setup').classList.remove('hidden')}
+function showHome(){clearTimeout(timer);document.getElementById('home').classList.remove('hidden');document.getElementById('game').classList.add('hidden')}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function value(c){return ranks.indexOf(c.r)}
+function beats(a,b){return a.s===b.s?value(a)>value(b):b.s===G.trump&&a.s!==G.trump}
+function sortHand(h){h.sort((a,b)=>(a.s===G.trump?1:0)-(b.s===G.trump?1:0)||suits.indexOf(a.s)-suits.indexOf(b.s)||value(a)-value(b))}
+function startGame(){
+ clearTimeout(timer);
+ let n=Number(document.getElementById('count').value);
+ let bots=Math.min(Number(document.getElementById('bots').value),n-1);
+ if(!bots)bots=n-1;
+ let deck=shuffle(suits.flatMap(s=>ranks.map(r=>({s,r,id:s+r}))));
+ G={deck,players:[{name:'Ты',face:'🧑',human:true,hand:[]}],table:[],trump:null,turn:0,attacker:0,defender:1,phase:'attack',selected:null,rule:document.getElementById('rule').value,difficulty:document.getElementById('difficulty').value,done:false,log:[],round:1};
+ for(let i=0;i<n-1;i++)G.players.push({name:names[i%5],face:faces[i%5],human:false,hand:[]});
+ while(G.players.some(p=>p.hand.length<6)&&G.deck.length)for(let p of G.players)if(p.hand.length<6&&G.deck.length)p.hand.push(G.deck.pop());
+ G.trump=G.deck.length?G.deck[G.deck.length-1].s:G.players[0].hand[0].s;
+ let low=Infinity;
+ G.players.forEach((p,i)=>p.hand.forEach(c=>{if(c.s===G.trump&&value(c)<low){low=value(c);G.attacker=i}}));
+ G.defender=(G.attacker+1)%n;G.turn=G.attacker;
+ G.players.forEach(p=>sortHand(p.hand));
+ selected=-1;
+ document.getElementById('home').classList.add('hidden');
+ document.getElementById('game').classList.remove('hidden');
+ document.getElementById('gameTitle').textContent=(G.rule==='throw'?'Подкидной':'Переводной')+' · '+n+' игроков';
+ log('Матч начался. Козырь '+G.trump);
+ render();botTurn();
+}
+function log(s){G.log.unshift(s);G.log=G.log.slice(0,12)}
+function current(){return G.players[G.turn]}
+function attackLimit(){return Math.min(6,G.players[G.defender].hand.length)}
+function ranksOnTable(){return G.table.flatMap(x=>[x.a.r,x.d?.r]).filter(Boolean)}
+function canAttack(c){return G.table.length===0||ranksOnTable().includes(c.r)}
+function render(){
+ if(!G)return;
+ let p=G.players;
+ document.getElementById('players').innerHTML=p.map((x,i)=>`<div class="player ${i===G.turn?'active':''}"><div class="avatar">${x.face}</div><b>${x.name}</b><div class="muted">${x.hand.length} карт ${i===G.turn?' · ход':''}</div>${x.human?'': '<div class="muted">Бот</div>'}</div>`).join('');
+ document.getElementById('trumpInfo').textContent='КОЗЫРЬ: '+G.trump+' · Колода: '+G.deck.length;
+ document.getElementById('deckInfo').textContent='Карт в колоде: '+G.deck.length;
+ document.getElementById('battle').innerHTML=G.table.map(x=>`<div class="slot"><div class="played ${'♥♦'.includes(x.a.s)?'red':''}">${x.a.r}${x.a.s}</div><div class="played ${x.d&&'♥♦'.includes(x.d.s)?'red':''}">${x.d?x.d.r+x.d.s:'?'}</div></div>`).join('');
+ let hand=G.players[0].hand;
+ document.getElementById('cards').innerHTML=hand.map((c,i)=>`<div class="card ${'♥♦'.includes(c.s)?'red':''} ${selected===i?'selected':''}" onclick="choose(${i})">${c.r}${c.s}</div>`).join('');
+ document.getElementById('handInfo').textContent=hand.length+' карт';
+ let human=G.turn===0&&!G.done;
+ document.getElementById('status').textContent=G.done?'Матч окончен':human?(G.phase==='attack'?'Твой ход — атакуй':G.phase==='defend'?'Защищайся или бери карты':'Подкидывай или заверши ход'):'Ход: '+current().name;
+ document.getElementById('attackBtn').disabled=!human||G.phase!=='attack'||selected<0;
+ document.getElementById('defendBtn').disabled=!human||G.phase!=='defend'||selected<0;
+ document.getElementById('takeBtn').disabled=!human||G.phase!=='defend';
+ document.getElementById('passBtn').disabled=!human||G.phase!=='throw';
+ document.getElementById('log').innerHTML=G.log.map(x=>'• '+x).join('<br>');
+}
+function choose(i){if(G.done||G.turn!==0)return;selected=selected===i?-1:i;render()}
+function removeCard(pi,c){let h=G.players[pi].hand;let i=h.findIndex(x=>x.id===c.id);if(i>=0)h.splice(i,1)}
+function attack(){
+ if(G.turn!==0||G.phase!=='attack'||selected<0)return;
+ let c=G.players[0].hand[selected];if(!canAttack(c)){toast('Нельзя подкинуть такую карту');return}
+ if(G.table.length>=attackLimit()){toast('Больше нельзя подкидывать');return}
+ removeCard(0,c);G.table.push({a:c,d:null});selected=-1;G.phase='defend';G.turn=G.defender;log('Ты атаковал картой '+c.r+c.s);render();botTurn();
+}
+function defend(){
+ if(G.turn!==0||G.phase!=='defend'||selected<0)return;
+ let c=G.players[0].hand[selected],slot=G.table.find(x=>!x.d);
+ if(!slot||!beats(c,slot.a)){toast('Эта карта не побьёт атакующую');return}
+ removeCard(0,c);slot.d=c;selected=-1;log('Ты отбился'); 
+ if(G.table.every(x=>x.d)){G.phase='throw';G.turn=G.attacker}
+ else G.turn=0;
+ render();botTurn();
+}
+function takeCards(){
+ if(G.turn!==0||G.phase!=='defend')return;
+ finishRound(true);render();botTurn();
+}
+function pass(){
+ if(G.turn!==0||G.phase!=='throw')return;
+ finishRound(false);render();botTurn();
+}
+function refill(){
+ for(let i=0;i<G.players.length;i++){
+  let pi=(G.attacker+i)%G.players.length,p=G.players[pi];
+  while(p.hand.length<6&&G.deck.length)p.hand.push(G.deck.pop());
+  sortHand(p.hand);
+ }
+}
+function finishRound(taken){
+ let d=G.players[G.defender];
+ if(taken){G.table.forEach(x=>{d.hand.push(x.a);if(x.d)d.hand.push(x.d)});sortHand(d.hand);log(d.name+' забрал карты')}
+ else log('Атака отбита');
+ G.table=[];refill();
+ if(G.deck.length===0){
+  let alive=G.players.filter(p=>p.hand.length>0);
+  if(alive.length<=1){G.done=true;log(alive.length?alive[0].name+' остался с картами — дурак!':'Все избавились от карт!');toast('Раунд окончен');return}
+ }
+ G.attacker=taken?G.defender:(G.defender+1)%G.players.length;
+ G.defender=(G.attacker+1)%G.players.length;
+ G.turn=G.attacker;G.phase='attack';selected=-1;
+}
+function botChooseAttack(pi){
+ let h=G.players[pi].hand.filter(canAttack);
+ if(!h.length||G.table.length>=attackLimit())return null;
+ h.sort((a,b)=>(a.s===G.trump)-(b.s===G.trump)||value(a)-value(b));
+ if(G.difficulty==='easy')return h[Math.floor(Math.random()*h.length)];
+ if(G.difficulty==='hard')return h[0];
+ return h[0];
+}
+function botTurn(){
+ clearTimeout(timer);
+ if(!G||G.done||G.turn===0)return;
+ let pi=G.turn,bot=G.players[pi];
+ timer=setTimeout(()=>{
+  if(!G||G.done||G.turn!==pi)return;
+  if(G.phase==='attack'){
+   let c=botChooseAttack(pi);
+   if(!c){finishRound(false)}
+   else{removeCard(pi,c);G.table.push({a:c,d:null});G.phase='defend';G.turn=G.defender;log(bot.name+' атакует')}
+  }else if(G.phase==='defend'){
+   let slot=G.table.find(x=>!x.d),options=bot.hand.filter(c=>slot&&beats(c,slot.a));
+   options.sort((a,b)=>(a.s===G.trump)-(b.s===G.trump)||value(a)-value(b));
+   if(options.length&& (G.difficulty==='hard'||Math.random()>.22)){
+    let c=options[0];removeCard(pi,c);slot.d=c;log(bot.name+' отбивается');
+    if(G.table.every(x=>x.d)){G.phase='throw';G.turn=G.attacker}else G.turn=pi;
+   }else{finishRound(true);log(bot.name+' берёт карты')}
+  }else if(G.phase==='throw'){
+   let c=botChooseAttack(pi);
+   if(c){removeCard(pi,c);G.table.push({a:c,d:null});G.phase='defend';G.turn=G.defender;log(bot.name+' подкидывает')}
+   else finishRound(false);
+  }
+  render();botTurn();
+ },850+Math.random()*650);
+}
+function sticker(s){
+ document.getElementById('reaction').textContent='Ты: '+s;
+ if(Math.random()>.45&&G&&!G.done){
+  let bot=G.players.find(p=>!p.human);
+  if(bot)setTimeout(()=>{document.getElementById('reaction').textContent=bot.name+': '+['😂','😎','🤡','💀','👍'][Math.floor(Math.random()*5)]},700);
+ }
+}
+</script>
+</body>
+</html>
